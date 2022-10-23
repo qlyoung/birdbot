@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "birdbot"
+version = "0.1.0"
+description = "Discord bot for interfacing with Cornell's All About Birds website"
+authors = ["Quentin Young <qlyoung@qlyoung.net>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+py-cord = "^2.2.2"
+PyYAML = "^6.0"
+beautifulsoup4 = "^4.11.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+pylint = "^2.15.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
