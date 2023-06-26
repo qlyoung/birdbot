@@ -2,9 +2,15 @@ import yaml
 import discord
 import aiohttp
 import re
+import tempfile
+import subprocess
+import glob
+import shutil
+import os
+import asyncio
 from bs4 import BeautifulSoup
 from io import BytesIO
-from discord import Embed, EmbedField, Option
+from discord import Embed, EmbedField, Option, SlashCommandOptionType
 
 bot = discord.Bot()
 
@@ -99,6 +105,26 @@ async def lookup_bird(
     await ctx.send_response(embeds=[bird, bird_range])
     await session.close()
 
+
+@bot.slash_command(description="Send a picture of a bird; the bot will attempt to identify it")
+@discord.commands.option("bird_pic", type=SlashCommandOptionType.attachment, description="Picture of bird to identify; NA species only for now", required=True)
+async def identify_bird(
+    ctx: discord.ApplicationContext,
+    bird_pic,
+):
+    if bird_pic.size > 100000000:
+        ctx.send_response("Image too large")
+
+    (bird_file, bird_path) = tempfile.mkstemp()
+    bird_path = bird_path + bird_pic.filename
+    await bird_pic.save(bird_path)
+    await ctx.defer()
+    proc = await asyncio.create_subprocess_shell(f"python3 ./yolov5/detect.py --device cpu --weights ./yolobirds/models/nabirds_det_v5m_b32_e300/weights/best.pt --source {bird_path} --name result --line-thickness 5")
+    await proc.communicate()
+    # os.remove(bird_path)
+    thefile = discord.File(glob.glob("yolov5/runs/detect/result/*")[0])
+    await ctx.send_followup(file=thefile)
+    shutil.rmtree("yolov5/runs/detect/result")
 
 with open("config.yaml") as config_file:
     config = yaml.safe_load(config_file)
