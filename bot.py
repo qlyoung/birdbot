@@ -133,7 +133,12 @@ async def identify_bird(
     if len(labelfiles) == 0:
         await ctx.send_followup("No birds identified")
         return
-    bird_classes = [line.split()[0] for line in open(labelfiles[0]).read().splitlines()]
+    bird_classes = set()
+    for file in labelfiles:
+        frame_classes = [line.split()[0] for line in open(file).read().splitlines()]
+        for c in frame_classes:
+            bird_classes.add(c)
+    bird_classes = list(bird_classes)
     # lol
     bird_class_map = {t[0]:t[1] for t in [(l.split()[0], " ".join(l.split()[1:])) for l in open("./yolobirds/models/nabirds_det_v5m_b32_e300/classes.txt").read().splitlines()]}
     bird_names = ", ".join([bird_class_map[bird_class] for bird_class in bird_classes])
