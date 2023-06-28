@@ -114,7 +114,8 @@ async def identify_bird(
     bird_pic,
 ):
     if bird_pic.size > 100000000:
-        ctx.send_response("Image too large")
+        await ctx.send_response("Image too large")
+        return
 
     try:
         shutil.rmtree("yolov5/runs/detect/result")
