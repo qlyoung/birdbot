@@ -37,6 +37,7 @@ async def lookup_bird(
 
     # normalize input
     bird_name_normalized = re.sub(r"\s+", "_", bird_name.strip())
+    bird_name_normalized = bird_name_normalized.replace("'", "")
 
     print(f"Using normalized bird name: {bird_name_normalized}")
 
