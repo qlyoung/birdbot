@@ -119,11 +119,15 @@ async def identify_bird(
     bird_path = bird_path + bird_pic.filename
     await bird_pic.save(bird_path)
     await ctx.defer()
-    proc = await asyncio.create_subprocess_shell(f"python3 ./yolov5/detect.py --device cpu --weights ./yolobirds/models/nabirds_det_v5m_b32_e300/weights/best.pt --source {bird_path} --name result --line-thickness 5")
+    proc = await asyncio.create_subprocess_shell(f"python3 ./yolov5/detect.py --device cpu --weights ./yolobirds/models/nabirds_det_v5m_b32_e300/weights/best.pt --source {bird_path} --name result --save-txt")
     await proc.communicate()
     # os.remove(bird_path)
-    thefile = discord.File(glob.glob("yolov5/runs/detect/result/*")[0])
-    await ctx.send_followup(file=thefile)
+    bird_classes = [line.split()[0] for line in open(glob.glob("yolov5/runs/detect/result/labels/*.txt")[0]).read().splitlines()]
+    # lol
+    bird_class_map = {t[0]:t[1] for t in [(l.split()[0], " ".join(l.split()[1:])) for l in open("./yolobirds/models/nabirds_det_v5m_b32_e300/classes.txt").read().splitlines()]}
+    bird_names = ", ".join([bird_class_map[bird_class] for bird_class in bird_classes])
+    annotated_pic = discord.File(glob.glob("yolov5/runs/detect/result/*.*")[0])
+    await ctx.send_followup(f"Identified {bird_names}", file=annotated_pic)
     shutil.rmtree("yolov5/runs/detect/result")
 
 with open("config.yaml") as config_file:
